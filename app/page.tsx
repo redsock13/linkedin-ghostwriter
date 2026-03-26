@@ -3,6 +3,9 @@
 import { useEffect, useRef, useState } from "react";
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
+import dynamic from "next/dynamic";
+
+const Sphere3D = dynamic(() => import("@/components/Sphere3D"), { ssr: false });
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -197,6 +200,7 @@ export default function Home() {
 
         {/* HERO */}
         <section style={{ minHeight: "100vh", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: "90px 24px 60px", textAlign: "center", position: "relative", overflow: "hidden" }}>
+          <Sphere3D />
           <ParticleCanvas />
           <div style={{ position: "absolute", inset: 0, background: "radial-gradient(ellipse 80% 60% at 50% 40%, rgba(0,87,255,.05) 0%,transparent 70%)", zIndex: 0, pointerEvents: "none" }} />
           <div style={{ position: "relative", zIndex: 1, display: "flex", flexDirection: "column", alignItems: "center", width: "100%" }}>
