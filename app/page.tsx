@@ -218,11 +218,11 @@ export default function Home() {
   }, []);
 
   const BG = { background: "linear-gradient(135deg,#0057ff,#0ea5e9)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" as const };
-  const ROLES = ["CEO", "Directeur Commercial", "Consultant", "Coach", "Fondateur", "Avocat d'affaires", "DG", "Expert-comptable"];
+  const ROLES = ["CEO", "VP of Sales", "Founder", "Executive Coach", "CMO", "Consultant", "Angel Investor", "Head of Growth"];
   const POSTS = [
-    { tag: "Leadership", text: "3 décisions que j'aurais aimé prendre 5 ans plus tôt en tant que directeur commercial…", likes: "847", comments: "143", name: "Marc D.", title: "Directeur Commercial · Fintech" },
-    { tag: "Vision", text: "Pourquoi 90% des consultants échouent sur LinkedIn — et ce que j'ai changé cette année.", likes: "1.2k", comments: "218", name: "Sophie L.", title: "Consultante Stratégie · Paris" },
-    { tag: "Growth", text: "J'ai généré 3 nouveaux clients en 30 jours sans prospecter. Voici exactement comment.", likes: "2.1k", comments: "394", name: "Thomas B.", title: "CEO · SaaS B2B" },
+    { tag: "Leadership", text: "3 decisions I wish I'd made 5 years earlier as a VP of Sales — and why most leaders avoid them.", likes: "2.1k", comments: "318", name: "Mark D.", title: "VP Sales · Series B Startup" },
+    { tag: "Founder", text: "Why 90% of founders fail on LinkedIn — and the one shift that changed everything for me.", likes: "4.7k", comments: "562", name: "Sarah L.", title: "Founder · B2B SaaS · New York" },
+    { tag: "Growth", text: "I closed 3 new clients in 30 days without cold outreach. Here's exactly what I did.", likes: "8.3k", comments: "1.2k", name: "Thomas B.", title: "CEO · VC-backed SaaS" },
   ];
 
   return (
@@ -251,7 +251,7 @@ export default function Home() {
                 onMouseLeave={e => ((e.target as HTMLElement).style.color = "#475569")}>{n}</a>
             ))}
           </div>
-          <MagBtn href="#contact" primary>Démarrer →</MagBtn>
+          <MagBtn href="#contact" primary>Start →</MagBtn>
         </nav>
 
         {/* HERO */}
@@ -264,13 +264,13 @@ export default function Home() {
             {/* Badge */}
             <div className="hb" style={{ display: "inline-flex", alignItems: "center", gap: 8, background: "rgba(0,87,255,.08)", border: "1px solid rgba(0,87,255,.18)", borderRadius: 999, padding: "7px 18px", fontSize: 13, color: "#60a5fa", marginBottom: 36, fontWeight: 500 }}>
               <span style={{ width: 7, height: 7, background: "#0057ff", borderRadius: "50%", boxShadow: "0 0 10px #0057ff", display: "inline-block" }} className="pulse" />
-              8 posts/mois · 199€/mois · Résiliable à tout moment
+              8 posts/month · $399/mo · Cancel anytime
             </div>
 
             {/* Title */}
             <div style={{ maxWidth: 880, marginBottom: 24 }}>
               <h1 className="ht1" style={{ fontSize: "clamp(50px,8vw,100px)", fontWeight: 900, letterSpacing: "-3px", lineHeight: 1.0, marginBottom: 6 }}>
-                Votre voix sur LinkedIn.
+                Your voice on LinkedIn.
               </h1>
               <h1 className="ht2" style={{ fontSize: "clamp(50px,8vw,100px)", fontWeight: 900, letterSpacing: "-3px", lineHeight: 1.02 }}>
                 <span id="sc" style={{ ...BG, backgroundSize: "200% auto" }} className="shimmer">·····</span>{" "}
@@ -280,16 +280,16 @@ export default function Home() {
 
             {/* Typewriter */}
             <div className="hs" style={{ fontSize: "clamp(17px,2.2vw,22px)", color: "#475569", maxWidth: 580, lineHeight: 1.65, marginBottom: 16 }}>
-              Vous êtes{" "}<TypeWriter texts={ROLES.map(r => `${r} LinkedIn`)} />.
+              You are{" "}<TypeWriter texts={ROLES.map(r => `${r} on LinkedIn`)} />.
             </div>
             <p className="hs" style={{ fontSize: 16, color: "#475569", maxWidth: 520, lineHeight: 1.65, marginBottom: 48 }}>
-              On écrit. Vous publiez. Votre audience grandit.{" "}
-              <span style={{ color: "#60a5fa", fontWeight: 500 }}>Sans jamais perdre votre authenticité.</span>
+              We write. You post. Your audience grows.{" "}
+              <span style={{ color: "#60a5fa", fontWeight: 500 }}>Without ever losing your authentic voice.</span>
             </p>
 
             {/* Buttons */}
             <div className="hbtns hero-btns" style={{ display: "flex", gap: 12, flexWrap: "wrap", justifyContent: "center", marginBottom: 64 }}>
-              <MagBtn href="#contact" primary big>Démarrer ce mois — 199€ →</MagBtn>
+              <MagBtn href="#contact" primary big>Start this month — $399 →</MagBtn>
               <MagBtn href="#s1" big={false}>Voir des exemples de posts</MagBtn>
             </div>
 
@@ -324,9 +324,9 @@ export default function Home() {
                     <div style={{ marginLeft: "auto", background: "rgba(0,87,255,.1)", color: "#60a5fa", borderRadius: 8, padding: "4px 10px", fontSize: 11, fontWeight: 700, border: "1px solid rgba(0,87,255,.15)" }}>GhostIn ✓</div>
                   </div>
                   <div style={{ fontSize: 14, color: "#cbd5e1", lineHeight: 1.7, marginBottom: 16, textAlign: "left" }}>
-                    J&apos;ai généré <strong style={{ color: "#f0f4ff" }}>3 nouveaux clients</strong> en 30 jours sans prospecter.<br /><br />
-                    Pas de cold email. Pas de pub. Juste <strong style={{ color: "#60a5fa" }}>LinkedIn.</strong><br /><br />
-                    Voilà exactement ce que j&apos;ai fait ↓
+                    I closed <strong style={{ color: "#f0f4ff" }}>3 new clients</strong> in 30 days without cold outreach.<br /><br />
+                    No cold email. No ads. Just <strong style={{ color: "#60a5fa" }}>LinkedIn.</strong><br /><br />
+                    Here&apos;s exactly what I did ↓
                   </div>
                   <div style={{ display: "flex", justifyContent: "space-between", padding: "12px 0", borderTop: "1px solid rgba(255,255,255,.06)", fontSize: 13, color: "#475569" }}>
                     <span>👍 2 143 réactions</span>
@@ -342,7 +342,7 @@ export default function Home() {
               </div>
               <div className="hb3 fl2" style={{ position: "absolute", bottom: -14, left: -14, background: "linear-gradient(135deg,#0057ff,#0ea5e9)", borderRadius: 12, padding: "9px 14px", boxShadow: "0 8px 32px rgba(0,87,255,.35)", display: "flex", alignItems: "center", gap: 9 }}>
                 <span style={{ fontSize: 18 }}>🚀</span>
-                <div><div style={{ fontWeight: 700, fontSize: 12, color: "#fff" }}>199€/mois</div><div style={{ fontSize: 10, color: "rgba(255,255,255,.65)" }}>8 posts garantis</div></div>
+                <div><div style={{ fontWeight: 700, fontSize: 12, color: "#fff" }}>$399/month</div><div style={{ fontSize: 10, color: "rgba(255,255,255,.65)" }}>8 posts guaranteed</div></div>
               </div>
             </TiltCard>
           </div>
@@ -366,13 +366,13 @@ export default function Home() {
             <div className="sr" style={{ marginBottom: 56 }}>
               <div style={{ display: "inline-flex", alignItems: "center", gap: 8, background: "rgba(0,87,255,.07)", border: "1px solid rgba(0,87,255,.15)", borderRadius: 999, padding: "6px 16px", fontSize: 13, color: "#60a5fa", fontWeight: 500, marginBottom: 16 }}>Comment ça marche</div>
               <h2 style={{ fontSize: "clamp(28px,4.5vw,54px)", fontWeight: 900, letterSpacing: "-1.5px", lineHeight: 1.08 }}>
-                Vous parlez.<br /><span style={BG}>On écrit. Vous brillez.</span>
+                You talk.<br /><span style={BG}>We write. You shine.</span>
               </h2>
             </div>
             {[
-              { n: "01", e: "🎙️", t: "Onboarding 30 min", d: "On apprend votre style, vos opinions, vos sujets de prédilection. Une interview et on a tout ce qu'il nous faut." },
-              { n: "02", e: "✍️", t: "8 posts rédigés / mois", d: "En avance. Dans votre style. Chaque post est unique, engageant, et authentiquement vous." },
-              { n: "03", e: "✅", t: "Vous validez, vous publiez", d: "Vous relisez, vous publiez quand vous voulez. Aucune contrainte. Vous gardez le contrôle total." },
+              { n: "01", e: "🎙️", t: "30-min onboarding call", d: "On apprend votre style, vos opinions, vos sujets de prédilection. Une interview et on a tout ce qu'il nous faut." },
+              { n: "02", e: "✍️", t: "8 posts / month", d: "Written in advance. In your voice. Each post is unique, engaging, and authentically you." },
+              { n: "03", e: "✅", t: "You approve, you post", d: "Review and post whenever you want. No pressure. You stay in full control." },
             ].map((s, i) => (
               <div key={i} className="sr" style={{ display: "grid", gridTemplateColumns: "68px 1fr", gap: 24, padding: "32px 0", borderBottom: i < 2 ? "1px solid rgba(255,255,255,.04)" : "none", alignItems: "flex-start" }}>
                 <div style={{ width: 56, height: 56, borderRadius: 16, background: "rgba(0,87,255,.08)", border: "1px solid rgba(0,87,255,.1)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 24, flexShrink: 0 }}>{s.e}</div>
@@ -450,11 +450,11 @@ export default function Home() {
             <div className="pricing-grid sr" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16 }}>
               {/* Card 1 */}
               <div style={{ background: "rgba(255,255,255,.03)", border: "1px solid rgba(0,87,255,.1)", borderRadius: 22, padding: "40px 36px" }}>
-                <div style={{ fontSize: 13, color: "#475569", marginBottom: 8 }}>Mensuel</div>
-                <div style={{ fontSize: 60, fontWeight: 900, letterSpacing: "-3px", ...BG, lineHeight: 1 }}>199€</div>
-                <div style={{ fontSize: 13, color: "#334155", marginBottom: 32 }}>par mois · sans engagement</div>
+                <div style={{ fontSize: 13, color: "#475569", marginBottom: 8 }}>Monthly</div>
+                <div style={{ fontSize: 60, fontWeight: 900, letterSpacing: "-3px", ...BG, lineHeight: 1 }}>$399</div>
+                <div style={{ fontSize: 13, color: "#334155", marginBottom: 32 }}>per month · no contract</div>
                 <div style={{ display: "flex", flexDirection: "column", gap: 13, marginBottom: 36 }}>
-                  {["8 posts LinkedIn/mois", "Rédigés dans votre style exact", "Onboarding 30 min", "Révisions illimitées", "Livraison 5 jours avant publication", "Résiliable à tout moment"].map((f, i) => (
+                  {["8 LinkedIn posts/month", "Written in your exact voice", "30-min onboarding call", "Unlimited revisions", "Delivered 5 days before you post", "Cancel anytime"].map((f, i) => (
                     <div key={i} style={{ display: "flex", gap: 11, alignItems: "center", fontSize: 14 }}>
                       <div style={{ width: 21, height: 21, borderRadius: "50%", background: "linear-gradient(135deg,#0057ff,#0ea5e9)", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
                         <span style={{ color: "#fff", fontSize: 10, fontWeight: 800 }}>✓</span>
@@ -463,20 +463,20 @@ export default function Home() {
                     </div>
                   ))}
                 </div>
-                <MagBtn href="#contact" primary>Démarrer ce mois →</MagBtn>
+                <MagBtn href="#contact" primary>Start this month →</MagBtn>
               </div>
 
               {/* Card 2 — highlighted */}
               <div style={{ padding: 2, borderRadius: 24, background: "linear-gradient(135deg,#0057ff,#0ea5e9,#38bdf8,#0057ff)", backgroundSize: "300%", animation: "gb 4s ease infinite" }}>
                 <div style={{ background: "#04040a", borderRadius: 22, padding: "40px 36px", height: "100%" }}>
                   <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 8 }}>
-                    <span style={{ fontSize: 13, color: "#475569" }}>Trimestriel</span>
+                    <span style={{ fontSize: 13, color: "#475569" }}>Quarterly</span>
                     <span style={{ background: "rgba(0,87,255,.1)", color: "#60a5fa", fontSize: 11, fontWeight: 700, borderRadius: 99, padding: "3px 10px", border: "1px solid rgba(0,87,255,.2)" }}>- 10%</span>
                   </div>
-                  <div style={{ fontSize: 60, fontWeight: 900, letterSpacing: "-3px", ...BG, lineHeight: 1 }}>179€</div>
-                  <div style={{ fontSize: 13, color: "#334155", marginBottom: 32 }}>par mois · engagement 3 mois</div>
+                  <div style={{ fontSize: 60, fontWeight: 900, letterSpacing: "-3px", ...BG, lineHeight: 1 }}>$349</div>
+                  <div style={{ fontSize: 13, color: "#334155", marginBottom: 32 }}>per month · 3-month commitment</div>
                   <div style={{ display: "flex", flexDirection: "column", gap: 13, marginBottom: 36 }}>
-                    {["Tout le pack mensuel", "10 posts/mois au lieu de 8", "Analyse performance mensuelle", "Stratégie éditoriale incluse", "Priorité sur les délais", "Support WhatsApp direct"].map((f, i) => (
+                    {["Everything in monthly", "10 posts/month instead of 8", "Monthly performance analysis", "Editorial strategy included", "Priority delivery", "Direct WhatsApp support"].map((f, i) => (
                       <div key={i} style={{ display: "flex", gap: 11, alignItems: "center", fontSize: 14 }}>
                         <div style={{ width: 21, height: 21, borderRadius: "50%", background: "linear-gradient(135deg,#0057ff,#0ea5e9)", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
                           <span style={{ color: "#fff", fontSize: 10, fontWeight: 800 }}>✓</span>
@@ -485,7 +485,7 @@ export default function Home() {
                       </div>
                     ))}
                   </div>
-                  <MagBtn href="#contact" primary>Meilleur rapport qualité/prix →</MagBtn>
+                  <MagBtn href="#contact" primary>Best value →</MagBtn>
                 </div>
               </div>
             </div>
@@ -497,14 +497,14 @@ export default function Home() {
           <div style={{ maxWidth: 580, margin: "0 auto", textAlign: "center" }}>
             <div className="sr">
               <h2 style={{ fontSize: "clamp(28px,4.5vw,56px)", fontWeight: 900, letterSpacing: "-1.5px", lineHeight: 1.08, marginBottom: 14 }}>
-                Votre prochain post<br /><span style={BG}>est déjà écrit.</span>
+                Your next post<br /><span style={BG}>is already written.</span>
               </h2>
               <p style={{ color: "#475569", fontSize: 17, marginBottom: 44, lineHeight: 1.65 }}>
-                Laissez votre email. On vous répond dans l&apos;heure.
+                Drop your email. We reply within the hour.
               </p>
               {sent ? (
                 <div style={{ background: "rgba(0,87,255,.07)", border: "1px solid rgba(0,87,255,.18)", borderRadius: 16, padding: "28px", fontSize: 18, color: "#60a5fa", fontWeight: 600 }}>
-                  ✓ Reçu ! On vous contact dans l&apos;heure. 🚀
+                  ✓ Got it! We&apos;ll reach out within the hour. 🚀
                 </div>
               ) : (
                 <form onSubmit={e => { e.preventDefault(); if (email) setSent(true); }}
@@ -514,12 +514,12 @@ export default function Home() {
                     onFocus={e => { (e.target as HTMLInputElement).style.borderColor = "rgba(0,87,255,.5)"; (e.target as HTMLInputElement).style.boxShadow = "0 0 0 4px rgba(0,87,255,.08)"; }}
                     onBlur={e => { (e.target as HTMLInputElement).style.borderColor = "rgba(0,87,255,.15)"; (e.target as HTMLInputElement).style.boxShadow = "none"; }} />
                   <button type="submit" style={{ background: "linear-gradient(135deg,#0057ff,#0ea5e9)", color: "#fff", padding: "14px 28px", borderRadius: 12, fontSize: 15, fontWeight: 700, border: "none", cursor: "none", fontFamily: "inherit", boxShadow: "0 8px 24px rgba(0,87,255,.35)" }}>
-                    Démarrer →
+                    Start →
                   </button>
                 </form>
               )}
               <p style={{ marginTop: 16, fontSize: 13, color: "#334155" }}>
-                Ou écrivez à{" "}
+                Or email us at{" "}
                 <a href="mailto:contact@mindforge-ia.com" style={{ color: "#60a5fa", textDecoration: "none", fontWeight: 500 }}>contact@mindforge-ia.com</a>
               </p>
             </div>
@@ -529,7 +529,7 @@ export default function Home() {
         {/* FOOTER */}
         <footer style={{ padding: "24px clamp(20px,4vw,48px)", borderTop: "1px solid rgba(0,87,255,.07)", display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: 10, background: "rgba(0,0,0,.5)" }}>
           <span style={{ fontWeight: 900, fontSize: 17 }}>Ghost<span style={BG}>In</span></span>
-          <span style={{ fontSize: 13, color: "#334155" }}>© 2026 · Par Safwane</span>
+          <span style={{ fontSize: 13, color: "#334155" }}>© 2026 · GhostIn</span>
           <a href="mailto:contact@mindforge-ia.com" style={{ fontSize: 13, color: "#334155", textDecoration: "none" }}>contact@mindforge-ia.com</a>
         </footer>
       </div>
