@@ -245,7 +245,7 @@ export default function Home() {
             Ghost<span style={BG}>In</span>
           </span>
           <div className="nav-links" style={{ display: "flex", gap: 32, fontSize: 14, color: "#475569" }}>
-            {["Comment ça marche", "Exemples", "Tarif"].map((n, i) => (
+            {["How it works", "Examples", "Pricing"].map((n, i) => (
               <a key={i} href={`#s${i}`} style={{ color: "inherit", textDecoration: "none" }}
                 onMouseEnter={e => ((e.target as HTMLElement).style.color = "#60a5fa")}
                 onMouseLeave={e => ((e.target as HTMLElement).style.color = "#475569")}>{n}</a>
@@ -298,7 +298,7 @@ export default function Home() {
               {[
                 { v: "+", to: 340, s: "%", l: "d'impressions en moyenne" },
                 { v: "", to: 8, s: " posts", l: "par mois garantis" },
-                { v: "", to: 48, s: "h", l: "premier post livré" },
+                { v: "", to: 48, s: "h", l: "first post delivered" },
               ].map((s, i) => (
                 <div key={i} className="hstat" style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 4, minWidth: 120 }}>
                   <div style={{ fontSize: 36, fontWeight: 900, letterSpacing: "-1.5px", ...BG }}>
@@ -370,7 +370,7 @@ export default function Home() {
               </h2>
             </div>
             {[
-              { n: "01", e: "🎙️", t: "30-min onboarding call", d: "On apprend votre style, vos opinions, vos sujets de prédilection. Une interview et on a tout ce qu'il nous faut." },
+              { n: "01", e: "🎙️", t: "30-min onboarding call", d: "We learn your style, opinions, and key topics. One interview is all we need." },
               { n: "02", e: "✍️", t: "8 posts / month", d: "Written in advance. In your voice. Each post is unique, engaging, and authentically you." },
               { n: "03", e: "✅", t: "You approve, you post", d: "Review and post whenever you want. No pressure. You stay in full control." },
             ].map((s, i) => (
@@ -428,7 +428,7 @@ export default function Home() {
         {/* MARQUEE 2 — Inversé */}
         <div style={{ overflow: "hidden", padding: "18px 0", background: "rgba(0,0,0,.4)", borderTop: "1px solid rgba(0,87,255,.06)" }}>
           <div className="mq2">
-            {[...Array(2)].flatMap(() => ["Notoriété", "Crédibilité", "Leads entrants", "Influence", "Visibilité", "Engagement", "Autorité", "Réseau"].map((r, i) => (
+            {[...Array(2)].flatMap(() => ["Authority", "Credibility", "Inbound Leads", "Influence", "Visibility", "Engagement", "Thought Leader", "Network"].map((r, i) => (
               <div key={`${r}${i}`} style={{ display: "flex", alignItems: "center", gap: 20, paddingRight: 40, whiteSpace: "nowrap" }}>
                 <span style={{ fontSize: 13, fontWeight: 500, color: "#1e3a5f" }}>{r}</span>
                 <span style={{ color: "#1e293b", fontSize: 8 }}>◆</span>
