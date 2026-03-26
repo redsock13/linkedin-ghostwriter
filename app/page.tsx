@@ -264,7 +264,7 @@ export default function Home() {
             {/* Badge */}
             <div className="hb" style={{ display: "inline-flex", alignItems: "center", gap: 8, background: "rgba(0,87,255,.08)", border: "1px solid rgba(0,87,255,.18)", borderRadius: 999, padding: "7px 18px", fontSize: 13, color: "#60a5fa", marginBottom: 36, fontWeight: 500 }}>
               <span style={{ width: 7, height: 7, background: "#0057ff", borderRadius: "50%", boxShadow: "0 0 10px #0057ff", display: "inline-block" }} className="pulse" />
-              8 posts/month · $399/mo · Cancel anytime
+              8 posts/month · $399/mo · No contract
             </div>
 
             {/* Title */}
@@ -273,8 +273,8 @@ export default function Home() {
                 Your voice on LinkedIn.
               </h1>
               <h1 className="ht2" style={{ fontSize: "clamp(50px,8vw,100px)", fontWeight: 900, letterSpacing: "-3px", lineHeight: 1.02 }}>
-                <span id="sc" style={{ ...BG, backgroundSize: "200% auto" }} className="shimmer">·····</span>{" "}
-                par <span style={BG}>Ghost<span style={{ color: "#38bdf8" }}>In</span></span>
+                Powered by{" "}
+                <span id="sc" style={{ ...BG, backgroundSize: "200% auto" }} className="shimmer">Ghost<span style={{ color: "#38bdf8" }}>In</span></span>
               </h1>
             </div>
 
@@ -290,14 +290,14 @@ export default function Home() {
             {/* Buttons */}
             <div className="hbtns hero-btns" style={{ display: "flex", gap: 12, flexWrap: "wrap", justifyContent: "center", marginBottom: 64 }}>
               <MagBtn href="#contact" primary big>Start this month — $399 →</MagBtn>
-              <MagBtn href="#s1" big={false}>Voir des exemples de posts</MagBtn>
+              <MagBtn href="#s1" big={false}>See example posts</MagBtn>
             </div>
 
             {/* Stats */}
             <div style={{ display: "flex", gap: 24, flexWrap: "wrap", justifyContent: "center", marginBottom: 72 }}>
               {[
-                { v: "+", to: 340, s: "%", l: "d'impressions en moyenne" },
-                { v: "", to: 8, s: " posts", l: "par mois garantis" },
+                { v: "+", to: 340, s: "%", l: "avg. impressions growth" },
+                { v: "", to: 8, s: " posts", l: "per month, guaranteed" },
                 { v: "", to: 48, s: "h", l: "first post delivered" },
               ].map((s, i) => (
                 <div key={i} className="hstat" style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 4, minWidth: 120 }}>
@@ -329,9 +329,9 @@ export default function Home() {
                     Here&apos;s exactly what I did ↓
                   </div>
                   <div style={{ display: "flex", justifyContent: "space-between", padding: "12px 0", borderTop: "1px solid rgba(255,255,255,.06)", fontSize: 13, color: "#475569" }}>
-                    <span>👍 2 143 réactions</span>
-                    <span>💬 394 commentaires</span>
-                    <span>🔁 521 partages</span>
+                    <span>👍 2,143 reactions</span>
+                    <span>💬 394 comments</span>
+                    <span>🔁 521 reposts</span>
                   </div>
                 </div>
               </div>
@@ -370,7 +370,7 @@ export default function Home() {
               </h2>
             </div>
             {[
-              { n: "01", e: "🎙️", t: "30-min onboarding call", d: "We learn your style, opinions, and key topics. One interview is all we need." },
+              { n: "01", e: "🎙️", t: "30-min kickoff call", d: "We learn your style, opinions, and key topics. One interview is all we need." },
               { n: "02", e: "✍️", t: "8 posts / month", d: "Written in advance. In your voice. Each post is unique, engaging, and authentically you." },
               { n: "03", e: "✅", t: "You approve, you post", d: "Review and post whenever you want. No pressure. You stay in full control." },
             ].map((s, i) => (
@@ -454,7 +454,7 @@ export default function Home() {
                 <div style={{ fontSize: 60, fontWeight: 900, letterSpacing: "-3px", ...BG, lineHeight: 1 }}>$399</div>
                 <div style={{ fontSize: 13, color: "#334155", marginBottom: 32 }}>per month · no contract</div>
                 <div style={{ display: "flex", flexDirection: "column", gap: 13, marginBottom: 36 }}>
-                  {["8 LinkedIn posts/month", "Written in your exact voice", "30-min onboarding call", "Unlimited revisions", "Delivered 5 days before you post", "Cancel anytime"].map((f, i) => (
+                  {["8 LinkedIn posts/month", "Written in your exact voice", "30-min kickoff call", "Unlimited revisions", "Delivered 5 days before you post", "Cancel anytime"].map((f, i) => (
                     <div key={i} style={{ display: "flex", gap: 11, alignItems: "center", fontSize: 14 }}>
                       <div style={{ width: 21, height: 21, borderRadius: "50%", background: "linear-gradient(135deg,#0057ff,#0ea5e9)", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
                         <span style={{ color: "#fff", fontSize: 10, fontWeight: 800 }}>✓</span>
@@ -509,7 +509,7 @@ export default function Home() {
               ) : (
                 <form onSubmit={e => { e.preventDefault(); if (email) setSent(true); }}
                   style={{ display: "flex", gap: 9, maxWidth: 460, margin: "0 auto", flexWrap: "wrap", justifyContent: "center" }}>
-                  <input type="email" placeholder="votre@email.com" value={email} onChange={e => setEmail(e.target.value)} required
+                  <input type="email" placeholder="your@email.com" value={email} onChange={e => setEmail(e.target.value)} required
                     style={{ flex: 1, minWidth: 200, background: "rgba(255,255,255,.05)", border: "1.5px solid rgba(0,87,255,.15)", borderRadius: 12, padding: "14px 18px", color: "#f0f4ff", fontSize: 15, outline: "none", fontFamily: "inherit" }}
                     onFocus={e => { (e.target as HTMLInputElement).style.borderColor = "rgba(0,87,255,.5)"; (e.target as HTMLInputElement).style.boxShadow = "0 0 0 4px rgba(0,87,255,.08)"; }}
                     onBlur={e => { (e.target as HTMLInputElement).style.borderColor = "rgba(0,87,255,.15)"; (e.target as HTMLInputElement).style.boxShadow = "none"; }} />
@@ -529,7 +529,7 @@ export default function Home() {
         {/* FOOTER */}
         <footer style={{ padding: "24px clamp(20px,4vw,48px)", borderTop: "1px solid rgba(0,87,255,.07)", display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: 10, background: "rgba(0,0,0,.5)" }}>
           <span style={{ fontWeight: 900, fontSize: 17 }}>Ghost<span style={BG}>In</span></span>
-          <span style={{ fontSize: 13, color: "#334155" }}>© 2026 · GhostIn</span>
+          <span style={{ fontSize: 13, color: "#334155" }}>© 2026 GhostIn</span>
           <a href="mailto:contact@mindforge-ia.com" style={{ fontSize: 13, color: "#334155", textDecoration: "none" }}>contact@mindforge-ia.com</a>
         </footer>
       </div>
