@@ -1,544 +1,538 @@
 "use client";
 
-import { motion, useScroll, useTransform, AnimatePresence } from "framer-motion";
-import { useRef, useState, useEffect } from "react";
-import AnimatedSection from "@/components/AnimatedSection";
+import { useEffect, useRef, useState } from "react";
+import { gsap } from "gsap";
+import { ScrollTrigger } from "gsap/ScrollTrigger";
 
-const POSTS = [
-  {
-    name: "Thomas Renard",
-    role: "Directeur Commercial · SaaS B2B",
-    avatar: "TR",
-    color: "#2563eb",
-    content: "J'ai réalisé que mes meilleurs clients venaient tous d'une seule chose : la confiance.\n\nPas les features. Pas le prix. La confiance.\n\nVoici comment je la construis en 90 jours avec un nouveau prospect ↓",
-    likes: 847,
-    comments: 63,
-  },
-  {
-    name: "Marie-Claire Dubois",
-    role: "Consultante RH · Cabinet indépendant",
-    avatar: "MD",
-    color: "#7c3aed",
-    content: "On m'a dit que le marché du recrutement allait être détruit par l'IA.\n\nJ'ai décidé d'en faire mon avantage compétitif.\n\n6 mois plus tard, mes honoraires ont augmenté de 40%.\n\nVoici ce que j'ai fait concrètement :",
-    likes: 1243,
-    comments: 89,
-  },
-  {
-    name: "Julien Moreau",
-    role: "Fondateur · Startup Fintech",
-    avatar: "JM",
-    color: "#059669",
-    content: "Notre startup a failli mourir en janvier.\n\nOn avait 3 mois de runway. Pas de croissance. Une équipe désemparée.\n\nAujourd'hui on est rentables.\n\nCe que j'aurais aimé savoir à l'époque :",
-    likes: 2891,
-    comments: 214,
-  },
-];
+gsap.registerPlugin(ScrollTrigger);
 
-const STEPS = [
-  {
-    number: "01",
-    title: "Vous répondez à 5 questions",
-    desc: "Votre secteur, vos valeurs, vos sujets d'expertise, votre style de communication. 15 minutes, une seule fois.",
-  },
-  {
-    number: "02",
-    title: "On analyse votre voix",
-    desc: "Notre IA étudie vos anciens posts, vos interviews, vos emails. Elle apprend à écrire exactement comme vous.",
-  },
-  {
-    number: "03",
-    title: "Vous recevez 8 posts par mois",
-    desc: "Le 1er de chaque mois. Format copy-paste. Prêts à publier. Vous changez ce que vous voulez, ou vous postez direct.",
-  },
-];
+/* ── SCRAMBLE ── */
+const CHARS = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+function scramble(el: HTMLElement, target: string, ms = 1000) {
+  const frames = Math.round(ms / 30), obj = { f: 0 };
+  const run = () => {
+    el.textContent = target.split("").map((c, i) =>
+      c === " " ? " " : obj.f / frames > i / target.length ? c : CHARS[Math.floor(Math.random() * CHARS.length)]
+    ).join("");
+    if (obj.f++ < frames) requestAnimationFrame(run); else el.textContent = target;
+  };
+  run();
+}
 
-const FEATURES = [
-  { icon: "✦", title: "Votre style, pas le nôtre", desc: "Chaque post est calibré sur votre façon de parler. Jamais générique." },
-  { icon: "◆", title: "Hooks qui accrochent", desc: "Les 2 premières lignes font tout. On les optimise pour stopper le scroll." },
-  { icon: "●", title: "8 posts par mois", desc: "Fréquence idéale pour l'algorithme LinkedIn. Ni trop, ni trop peu." },
-  { icon: "▲", title: "Sujets stratégiques", desc: "On choisit les angles qui font grandir votre autorité dans votre niche." },
-  { icon: "★", title: "Livraison le 1er du mois", desc: "Un Google Doc propre, tout est prêt. Vous copiez, vous collez, c'est tout." },
-  { icon: "⬡", title: "Résiliable à tout moment", desc: "Pas d'engagement. Vous restez parce que ça marche, pas parce que vous êtes piégé." },
-];
-
-export default function Home() {
-  const heroRef = useRef(null);
-  const { scrollY } = useScroll();
-  const heroY = useTransform(scrollY, [0, 600], [0, -100]);
-  const heroOpacity = useTransform(scrollY, [0, 400], [1, 0]);
-  const [activePost, setActivePost] = useState(0);
-  const [email, setEmail] = useState("");
-  const [submitted, setSubmitted] = useState(false);
-
+/* ── TYPING EFFECT ── */
+function TypeWriter({ texts }: { texts: string[] }) {
+  const [cur, setCur] = useState(0);
+  const [txt, setTxt] = useState("");
+  const [del, setDel] = useState(false);
   useEffect(() => {
-    const interval = setInterval(() => {
-      setActivePost((p) => (p + 1) % POSTS.length);
-    }, 3000);
-    return () => clearInterval(interval);
+    const target = texts[cur];
+    const speed = del ? 40 : 80;
+    const t = setTimeout(() => {
+      if (!del) {
+        if (txt.length < target.length) setTxt(target.slice(0, txt.length + 1));
+        else setTimeout(() => setDel(true), 1800);
+      } else {
+        if (txt.length > 0) setTxt(txt.slice(0, -1));
+        else { setDel(false); setCur((c) => (c + 1) % texts.length); }
+      }
+    }, speed);
+    return () => clearTimeout(t);
+  }, [txt, del, cur, texts]);
+  return (
+    <span style={{ color: "#60a5fa" }}>
+      {txt}<span className="type-cursor" style={{ color: "#0057ff" }}>|</span>
+    </span>
+  );
+}
+
+/* ── PARTICLE CANVAS ── */
+function ParticleCanvas() {
+  const ref = useRef<HTMLCanvasElement>(null);
+  useEffect(() => {
+    const c = ref.current!;
+    const ctx = c.getContext("2d")!;
+    let W = c.width = window.innerWidth, H = c.height = window.innerHeight;
+    const resize = () => { W = c.width = window.innerWidth; H = c.height = window.innerHeight; };
+    window.addEventListener("resize", resize);
+    const mouse = { x: W / 2, y: H / 2 };
+    window.addEventListener("mousemove", e => { mouse.x = e.clientX; mouse.y = e.clientY; });
+    const N = 90;
+    const pts = Array.from({ length: N }, () => ({
+      x: Math.random() * W, y: Math.random() * H,
+      vx: (Math.random() - .5) * .4, vy: (Math.random() - .5) * .4,
+      r: Math.random() * 1.5 + .5, pulse: Math.random() * Math.PI * 2,
+    }));
+    let raf: number, t = 0;
+    const draw = () => {
+      t += .012;
+      ctx.clearRect(0, 0, W, H);
+      pts.forEach(p => {
+        const dx = mouse.x - p.x, dy = mouse.y - p.y, d = Math.hypot(dx, dy);
+        if (d < 180) { p.vx += dx / d * .012; p.vy += dy / d * .012; }
+        p.vx *= .98; p.vy *= .98;
+        p.x += p.vx; p.y += p.vy;
+        if (p.x < 0 || p.x > W) p.vx *= -1;
+        if (p.y < 0 || p.y > H) p.vy *= -1;
+      });
+      pts.forEach((a, i) => pts.slice(i + 1).forEach(b => {
+        const d = Math.hypot(a.x - b.x, a.y - b.y);
+        if (d < 130) {
+          ctx.beginPath(); ctx.moveTo(a.x, a.y); ctx.lineTo(b.x, b.y);
+          ctx.strokeStyle = `rgba(0,87,255,${.13 * (1 - d / 130)})`; ctx.lineWidth = .6; ctx.stroke();
+        }
+      }));
+      pts.forEach(p => {
+        const g = Math.sin(t + p.pulse) * .5 + .5;
+        const grad = ctx.createRadialGradient(p.x, p.y, 0, p.x, p.y, p.r * 7);
+        grad.addColorStop(0, `rgba(0,87,255,${.25 * g})`); grad.addColorStop(1, "transparent");
+        ctx.beginPath(); ctx.arc(p.x, p.y, p.r * 7, 0, Math.PI * 2); ctx.fillStyle = grad; ctx.fill();
+        ctx.beginPath(); ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2); ctx.fillStyle = "#0057ff";
+        ctx.globalAlpha = .6 + g * .4; ctx.fill(); ctx.globalAlpha = 1;
+      });
+      raf = requestAnimationFrame(draw);
+    };
+    draw();
+    return () => { cancelAnimationFrame(raf); window.removeEventListener("resize", resize); };
+  }, []);
+  return <canvas ref={ref} style={{ position: "absolute", inset: 0, zIndex: 0, pointerEvents: "none" }} />;
+}
+
+/* ── MAGNETIC BTN ── */
+function MagBtn({ children, href, primary, big }: { children: React.ReactNode; href: string; primary?: boolean; big?: boolean }) {
+  const r = useRef<HTMLAnchorElement>(null);
+  const onMove = (e: React.MouseEvent) => {
+    const b = r.current!.getBoundingClientRect();
+    gsap.to(r.current, { x: (e.clientX - b.left - b.width / 2) * .28, y: (e.clientY - b.top - b.height / 2) * .28, duration: .3, ease: "power2.out" });
+  };
+  const onLeave = () => gsap.to(r.current, { x: 0, y: 0, duration: .6, ease: "elastic.out(1,.4)" });
+  return (
+    <a ref={r} href={href} onMouseMove={onMove} onMouseLeave={onLeave} style={{
+      display: "inline-flex", alignItems: "center", gap: 8, textDecoration: "none",
+      padding: big ? "17px 44px" : "13px 28px", borderRadius: 999,
+      fontSize: big ? 17 : 15, fontWeight: 600,
+      background: primary ? "linear-gradient(135deg,#0057ff,#0ea5e9)" : "rgba(0,87,255,.07)",
+      color: primary ? "#fff" : "#60a5fa",
+      border: primary ? "none" : "1px solid rgba(0,87,255,.2)",
+      boxShadow: primary ? "0 8px 32px rgba(0,87,255,.35), inset 0 1px 0 rgba(255,255,255,.12)" : "none",
+      transition: "box-shadow .25s", flexShrink: 0,
+    }}>
+      {children}
+    </a>
+  );
+}
+
+/* ── TILT CARD ── */
+function TiltCard({ children, style, className }: { children: React.ReactNode; style?: React.CSSProperties; className?: string }) {
+  const r = useRef<HTMLDivElement>(null);
+  const onMove = (e: React.MouseEvent) => {
+    const b = r.current!.getBoundingClientRect();
+    gsap.to(r.current, { rotateX: (e.clientY - b.top - b.height / 2) / b.height * 14, rotateY: -(e.clientX - b.left - b.width / 2) / b.width * 14, duration: .35, ease: "power2.out", transformPerspective: 900 });
+  };
+  const onLeave = () => gsap.to(r.current, { rotateX: 0, rotateY: 0, duration: .8, ease: "elastic.out(1,.35)" });
+  return <div ref={r} className={className} onMouseMove={onMove} onMouseLeave={onLeave} style={{ transformStyle: "preserve-3d", ...style }}>{children}</div>;
+}
+
+/* ── COUNTER ── */
+function Counter({ to, suffix = "" }: { to: number; suffix?: string }) {
+  const r = useRef<HTMLSpanElement>(null);
+  useEffect(() => {
+    const o = { v: 0 };
+    gsap.to(o, { v: to, duration: 2.5, ease: "power3.out", scrollTrigger: { trigger: r.current, start: "top 85%", once: true }, onUpdate: () => { if (r.current) r.current.textContent = Math.round(o.v) + suffix; } });
+  }, [to, suffix]);
+  return <span ref={r}>0{suffix}</span>;
+}
+
+/* ────────── PAGE ────────── */
+export default function Home() {
+  const root = useRef<HTMLDivElement>(null);
+  const [email, setEmail] = useState("");
+  const [sent, setSent] = useState(false);
+
+  /* Cursor */
+  useEffect(() => {
+    const dot = document.getElementById("cur"), ring = document.getElementById("cur-ring");
+    if (!dot || !ring) return;
+    const fn = (e: MouseEvent) => { gsap.to(dot, { x: e.clientX, y: e.clientY, duration: .04 }); gsap.to(ring, { x: e.clientX, y: e.clientY, duration: .14 }); };
+    window.addEventListener("mousemove", fn);
+    return () => window.removeEventListener("mousemove", fn);
   }, []);
 
+  /* Spotlight */
+  useEffect(() => {
+    const el = document.getElementById("spt");
+    if (!el) return;
+    const fn = (e: MouseEvent) => { el.style.setProperty("--x", e.clientX + "px"); el.style.setProperty("--y", e.clientY + "px"); };
+    window.addEventListener("mousemove", fn);
+    return () => window.removeEventListener("mousemove", fn);
+  }, []);
+
+  /* Lenis */
+  useEffect(() => {
+    import("lenis").then(m => {
+      const lenis = new m.default({ lerp: .09, smoothWheel: true });
+      gsap.ticker.add(t => lenis.raf(t * 1000));
+      gsap.ticker.lagSmoothing(0);
+    }).catch(() => {});
+  }, []);
+
+  /* Hero scramble */
+  useEffect(() => {
+    const el = document.getElementById("sc");
+    if (el) setTimeout(() => scramble(el, "GhostIn", 900), 700);
+  }, []);
+
+  /* GSAP */
+  useEffect(() => {
+    const ctx = gsap.context(() => {
+      /* Hero */
+      gsap.set([".hn", ".hb", ".ht1", ".ht2", ".hs", ".hbtns", ".hcard", ".hb2", ".hb3", ".hstat"], { opacity: 0 });
+      gsap.set([".ht1", ".ht2"], { y: 60 });
+      gsap.set([".hb", ".hs", ".hbtns", ".hstat"], { y: 24 });
+      gsap.set(".hcard", { y: 70, rotateX: 8 });
+      gsap.set(".hb2", { x: 20, y: -10 });
+      gsap.set(".hb3", { x: -20, y: 10 });
+
+      gsap.timeline({ delay: .1 })
+        .to(".hn", { opacity: 1, duration: .5 })
+        .to(".hb", { opacity: 1, y: 0, duration: .6, ease: "power3.out" }, "-=.2")
+        .to(".ht1", { opacity: 1, y: 0, duration: 1, ease: "power4.out" }, "-=.3")
+        .to(".ht2", { opacity: 1, y: 0, duration: 1, ease: "power4.out" }, "-=.7")
+        .to(".hs", { opacity: 1, y: 0, duration: .8, ease: "power3.out" }, "-=.5")
+        .to(".hbtns", { opacity: 1, y: 0, duration: .7, ease: "power3.out" }, "-=.4")
+        .to(".hstat", { opacity: 1, y: 0, stagger: .08, duration: .6, ease: "power3.out" }, "-=.4")
+        .to(".hcard", { opacity: 1, y: 0, rotateX: 0, duration: 1.1, ease: "power3.out" }, "-=.5")
+        .to(".hb2", { opacity: 1, x: 0, y: 0, duration: .6, ease: "back.out(1.7)" }, "-=.3")
+        .to(".hb3", { opacity: 1, x: 0, y: 0, duration: .6, ease: "back.out(1.7)" }, "-=.4");
+
+      /* Scroll */
+      gsap.utils.toArray<HTMLElement>(".sr").forEach(el => {
+        gsap.set(el, { opacity: 0, y: 44 });
+        gsap.to(el, { opacity: 1, y: 0, duration: .85, ease: "power3.out", scrollTrigger: { trigger: el, start: "top 82%", once: true } });
+      });
+      gsap.utils.toArray<HTMLElement>(".src").forEach((el, i) => {
+        gsap.set(el, { opacity: 0, y: 50, scale: .97 });
+        gsap.to(el, { opacity: 1, y: 0, scale: 1, duration: .75, ease: "power3.out", delay: (i % 3) * .09, scrollTrigger: { trigger: el, start: "top 82%", once: true } });
+      });
+    }, root);
+    return () => ctx.revert();
+  }, []);
+
+  const BG = { background: "linear-gradient(135deg,#0057ff,#0ea5e9)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" as const };
+  const ROLES = ["CEO", "Directeur Commercial", "Consultant", "Coach", "Fondateur", "Avocat d'affaires", "DG", "Expert-comptable"];
+  const POSTS = [
+    { tag: "Leadership", text: "3 décisions que j'aurais aimé prendre 5 ans plus tôt en tant que directeur commercial…", likes: "847", comments: "143", name: "Marc D.", title: "Directeur Commercial · Fintech" },
+    { tag: "Vision", text: "Pourquoi 90% des consultants échouent sur LinkedIn — et ce que j'ai changé cette année.", likes: "1.2k", comments: "218", name: "Sophie L.", title: "Consultante Stratégie · Paris" },
+    { tag: "Growth", text: "J'ai généré 3 nouveaux clients en 30 jours sans prospecter. Voici exactement comment.", likes: "2.1k", comments: "394", name: "Thomas B.", title: "CEO · SaaS B2B" },
+  ];
+
   return (
-    <main style={{ background: "#000", color: "#f5f5f7", minHeight: "100vh" }}>
+    <>
+      <div id="cur" /><div id="cur-ring" /><div id="spt" /><div className="scanline" />
 
-      {/* NAV */}
-      <motion.nav
-        initial={{ opacity: 0, y: -20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.6 }}
-        style={{
-          position: "fixed", top: 0, left: 0, right: 0, zIndex: 100,
-          display: "flex", justifyContent: "space-between", alignItems: "center",
-          padding: "20px 48px",
-          background: "rgba(0,0,0,0.8)",
-          backdropFilter: "blur(20px)",
-          borderBottom: "1px solid rgba(255,255,255,0.06)",
-        }}
-      >
-        <span style={{ fontSize: 20, fontWeight: 700, letterSpacing: "-0.5px" }}>
-          Ghost<span style={{ color: "#0a66c2" }}>In</span>
-        </span>
-        <div style={{ display: "flex", gap: 32, fontSize: 14, color: "#6e6e73" }}>
-          <a href="#comment" style={{ color: "inherit", textDecoration: "none" }}>Comment ça marche</a>
-          <a href="#exemples" style={{ color: "inherit", textDecoration: "none" }}>Exemples</a>
-          <a href="#tarif" style={{ color: "inherit", textDecoration: "none" }}>Tarif</a>
-        </div>
-        <a
-          href="#contact"
-          style={{
-            background: "#fff", color: "#000", padding: "8px 20px",
-            borderRadius: 999, fontSize: 14, fontWeight: 600,
-            textDecoration: "none", transition: "opacity 0.2s",
-          }}
-        >
-          Démarrer
-        </a>
-      </motion.nav>
+      {/* Aurora BG */}
+      <div aria-hidden style={{ position: "fixed", inset: 0, zIndex: 0, overflow: "hidden", pointerEvents: "none" }}>
+        <div className="a1" style={{ position: "absolute", top: "-10%", right: "-5%", width: 700, height: 700, borderRadius: "50%", background: "radial-gradient(circle,rgba(0,87,255,.16) 0%,transparent 65%)", filter: "blur(70px)" }} />
+        <div className="a2" style={{ position: "absolute", top: "30%", left: "-8%", width: 550, height: 550, borderRadius: "50%", background: "radial-gradient(circle,rgba(14,165,233,.12) 0%,transparent 65%)", filter: "blur(80px)" }} />
+        <div className="a3" style={{ position: "absolute", bottom: "5%", right: "20%", width: 380, height: 380, borderRadius: "50%", background: "radial-gradient(circle,rgba(56,189,248,.1) 0%,transparent 65%)", filter: "blur(60px)" }} />
+        <div className="dot-grid" />
+      </div>
 
-      {/* HERO */}
-      <section ref={heroRef} style={{ minHeight: "100vh", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: "120px 24px 80px", position: "relative", overflow: "hidden" }}>
+      <div ref={root} style={{ position: "relative", zIndex: 2 }}>
 
-        {/* Gradient background */}
-        <div style={{
-          position: "absolute", inset: 0, zIndex: 0,
-          background: "radial-gradient(ellipse 80% 60% at 50% -10%, rgba(10,102,194,0.15) 0%, transparent 70%)",
-        }} />
-
-        {/* Grid */}
-        <div style={{
-          position: "absolute", inset: 0, zIndex: 0,
-          backgroundImage: "linear-gradient(rgba(255,255,255,0.03) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.03) 1px, transparent 1px)",
-          backgroundSize: "60px 60px",
-          maskImage: "radial-gradient(ellipse at center, black 40%, transparent 80%)",
-        }} />
-
-        <motion.div
-          style={{ y: heroY, opacity: heroOpacity, position: "relative", zIndex: 1, textAlign: "center", maxWidth: 860 }}
-        >
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5 }}
-            style={{
-              display: "inline-flex", alignItems: "center", gap: 8,
-              background: "rgba(10,102,194,0.12)", border: "1px solid rgba(10,102,194,0.3)",
-              borderRadius: 999, padding: "6px 16px", fontSize: 13, color: "#5b9bd5",
-              marginBottom: 32, fontWeight: 500,
-            }}
-          >
-            <span style={{ width: 6, height: 6, borderRadius: "50%", background: "#0a66c2", display: "inline-block" }} />
-            Conçu pour les pros qui n'ont pas le temps
-          </motion.div>
-
-          <motion.h1
-            initial={{ opacity: 0, y: 30 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.7, delay: 0.1 }}
-            style={{
-              fontSize: "clamp(48px, 7vw, 88px)",
-              fontWeight: 700,
-              lineHeight: 1.05,
-              letterSpacing: "-2px",
-              marginBottom: 24,
-            }}
-          >
-            Votre LinkedIn.<br />
-            <span style={{
-              background: "linear-gradient(135deg, #0a66c2, #5b9bd5, #fff)",
-              WebkitBackgroundClip: "text",
-              WebkitTextFillColor: "transparent",
-            }}>
-              Sans y toucher.
-            </span>
-          </motion.h1>
-
-          <motion.p
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.7, delay: 0.2 }}
-            style={{ fontSize: 20, color: "#86868b", maxWidth: 560, margin: "0 auto 48px", lineHeight: 1.6 }}
-          >
-            8 posts LinkedIn par mois rédigés dans votre style exact.
-            Vous copiez, vous collez, vous publiez.
-          </motion.p>
-
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.7, delay: 0.3 }}
-            style={{ display: "flex", gap: 16, justifyContent: "center", flexWrap: "wrap" }}
-          >
-            <a
-              href="#contact"
-              style={{
-                background: "#fff", color: "#000",
-                padding: "16px 36px", borderRadius: 999,
-                fontSize: 16, fontWeight: 600, textDecoration: "none",
-                transition: "transform 0.2s, opacity 0.2s",
-                display: "inline-block",
-              }}
-              onMouseEnter={e => (e.currentTarget.style.opacity = "0.85")}
-              onMouseLeave={e => (e.currentTarget.style.opacity = "1")}
-            >
-              Démarrer — 199€/mois
-            </a>
-            <a
-              href="#exemples"
-              style={{
-                background: "transparent", color: "#fff",
-                padding: "16px 36px", borderRadius: 999,
-                fontSize: 16, fontWeight: 500, textDecoration: "none",
-                border: "1px solid rgba(255,255,255,0.15)",
-              }}
-            >
-              Voir des exemples ↓
-            </a>
-          </motion.div>
-
-          <motion.p
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: 0.6 }}
-            style={{ marginTop: 24, fontSize: 13, color: "#6e6e73" }}
-          >
-            Sans engagement · Résiliable à tout moment
-          </motion.p>
-        </motion.div>
-
-        {/* Floating posts preview */}
-        <motion.div
-          initial={{ opacity: 0, y: 60 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 1, delay: 0.5 }}
-          style={{ position: "relative", zIndex: 1, marginTop: 80, width: "100%", maxWidth: 420 }}
-        >
-          <AnimatePresence mode="wait">
-            <motion.div
-              key={activePost}
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -20 }}
-              transition={{ duration: 0.4 }}
-              style={{
-                background: "#1c1c1e",
-                border: "1px solid rgba(255,255,255,0.08)",
-                borderRadius: 16,
-                padding: 24,
-                boxShadow: "0 40px 80px rgba(0,0,0,0.6)",
-              }}
-            >
-              <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 16 }}>
-                <div style={{
-                  width: 44, height: 44, borderRadius: "50%",
-                  background: POSTS[activePost].color,
-                  display: "flex", alignItems: "center", justifyContent: "center",
-                  fontSize: 14, fontWeight: 700, color: "white",
-                }}>
-                  {POSTS[activePost].avatar}
-                </div>
-                <div>
-                  <div style={{ fontWeight: 600, fontSize: 14 }}>{POSTS[activePost].name}</div>
-                  <div style={{ fontSize: 12, color: "#6e6e73" }}>{POSTS[activePost].role}</div>
-                </div>
-              </div>
-              <p style={{ fontSize: 14, lineHeight: 1.7, color: "#d1d1d6", whiteSpace: "pre-line" }}>
-                {POSTS[activePost].content}
-              </p>
-              <div style={{ display: "flex", gap: 24, marginTop: 16, paddingTop: 16, borderTop: "1px solid rgba(255,255,255,0.06)", fontSize: 13, color: "#6e6e73" }}>
-                <span>👍 {POSTS[activePost].likes.toLocaleString()}</span>
-                <span>💬 {POSTS[activePost].comments} commentaires</span>
-              </div>
-            </motion.div>
-          </AnimatePresence>
-
-          {/* Dots */}
-          <div style={{ display: "flex", justifyContent: "center", gap: 8, marginTop: 16 }}>
-            {POSTS.map((_, i) => (
-              <button
-                key={i}
-                onClick={() => setActivePost(i)}
-                style={{
-                  width: i === activePost ? 24 : 8, height: 8,
-                  borderRadius: 4, border: "none", cursor: "pointer",
-                  background: i === activePost ? "#0a66c2" : "#333",
-                  transition: "all 0.3s",
-                }}
-              />
+        {/* NAV */}
+        <nav className="hn" style={{ position: "fixed", top: 0, left: 0, right: 0, zIndex: 100, display: "flex", alignItems: "center", justifyContent: "space-between", padding: "0 clamp(20px,4vw,48px)", height: 62, background: "rgba(4,4,10,.85)", backdropFilter: "blur(24px) saturate(180%)", borderBottom: "1px solid rgba(0,87,255,.08)" }}>
+          <span style={{ fontWeight: 900, fontSize: 20, letterSpacing: "-0.5px" }}>
+            Ghost<span style={BG}>In</span>
+          </span>
+          <div className="nav-links" style={{ display: "flex", gap: 32, fontSize: 14, color: "#475569" }}>
+            {["Comment ça marche", "Exemples", "Tarif"].map((n, i) => (
+              <a key={i} href={`#s${i}`} style={{ color: "inherit", textDecoration: "none" }}
+                onMouseEnter={e => ((e.target as HTMLElement).style.color = "#60a5fa")}
+                onMouseLeave={e => ((e.target as HTMLElement).style.color = "#475569")}>{n}</a>
             ))}
           </div>
-        </motion.div>
-      </section>
+          <MagBtn href="#contact" primary>Démarrer →</MagBtn>
+        </nav>
 
-      {/* STATS */}
-      <AnimatedSection>
-        <section style={{ padding: "60px 24px", borderTop: "1px solid rgba(255,255,255,0.06)", borderBottom: "1px solid rgba(255,255,255,0.06)" }}>
-          <div style={{ maxWidth: 900, margin: "0 auto", display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 0, textAlign: "center" }}>
+        {/* HERO */}
+        <section style={{ minHeight: "100vh", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: "90px 24px 60px", textAlign: "center", position: "relative", overflow: "hidden" }}>
+          <ParticleCanvas />
+          <div style={{ position: "absolute", inset: 0, background: "radial-gradient(ellipse 80% 60% at 50% 40%, rgba(0,87,255,.05) 0%,transparent 70%)", zIndex: 0, pointerEvents: "none" }} />
+
+          <div style={{ position: "relative", zIndex: 1, display: "flex", flexDirection: "column", alignItems: "center", width: "100%" }}>
+
+            {/* Badge */}
+            <div className="hb" style={{ display: "inline-flex", alignItems: "center", gap: 8, background: "rgba(0,87,255,.08)", border: "1px solid rgba(0,87,255,.18)", borderRadius: 999, padding: "7px 18px", fontSize: 13, color: "#60a5fa", marginBottom: 36, fontWeight: 500 }}>
+              <span style={{ width: 7, height: 7, background: "#0057ff", borderRadius: "50%", boxShadow: "0 0 10px #0057ff", display: "inline-block" }} className="pulse" />
+              8 posts/mois · 199€/mois · Résiliable à tout moment
+            </div>
+
+            {/* Title */}
+            <div style={{ maxWidth: 880, marginBottom: 24 }}>
+              <h1 className="ht1" style={{ fontSize: "clamp(50px,8vw,100px)", fontWeight: 900, letterSpacing: "-3px", lineHeight: 1.0, marginBottom: 6 }}>
+                Votre voix sur LinkedIn.
+              </h1>
+              <h1 className="ht2" style={{ fontSize: "clamp(50px,8vw,100px)", fontWeight: 900, letterSpacing: "-3px", lineHeight: 1.02 }}>
+                <span id="sc" style={{ ...BG, backgroundSize: "200% auto" }} className="shimmer">·····</span>{" "}
+                par <span style={BG}>Ghost<span style={{ color: "#38bdf8" }}>In</span></span>
+              </h1>
+            </div>
+
+            {/* Typewriter */}
+            <div className="hs" style={{ fontSize: "clamp(17px,2.2vw,22px)", color: "#475569", maxWidth: 580, lineHeight: 1.65, marginBottom: 16 }}>
+              Vous êtes{" "}<TypeWriter texts={ROLES.map(r => `${r} LinkedIn`)} />.
+            </div>
+            <p className="hs" style={{ fontSize: 16, color: "#475569", maxWidth: 520, lineHeight: 1.65, marginBottom: 48 }}>
+              On écrit. Vous publiez. Votre audience grandit.{" "}
+              <span style={{ color: "#60a5fa", fontWeight: 500 }}>Sans jamais perdre votre authenticité.</span>
+            </p>
+
+            {/* Buttons */}
+            <div className="hbtns hero-btns" style={{ display: "flex", gap: 12, flexWrap: "wrap", justifyContent: "center", marginBottom: 64 }}>
+              <MagBtn href="#contact" primary big>Démarrer ce mois — 199€ →</MagBtn>
+              <MagBtn href="#s1" big={false}>Voir des exemples de posts</MagBtn>
+            </div>
+
+            {/* Stats */}
+            <div style={{ display: "flex", gap: 24, flexWrap: "wrap", justifyContent: "center", marginBottom: 72 }}>
+              {[
+                { v: "+", to: 340, s: "%", l: "d'impressions en moyenne" },
+                { v: "", to: 8, s: " posts", l: "par mois garantis" },
+                { v: "", to: 48, s: "h", l: "premier post livré" },
+              ].map((s, i) => (
+                <div key={i} className="hstat" style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 4, minWidth: 120 }}>
+                  <div style={{ fontSize: 36, fontWeight: 900, letterSpacing: "-1.5px", ...BG }}>
+                    {s.v}<Counter to={s.to} suffix={s.s} />
+                  </div>
+                  <div style={{ fontSize: 13, color: "#475569" }}>{s.l}</div>
+                </div>
+              ))}
+            </div>
+
+            {/* Hero card */}
+            <TiltCard className="hcard" style={{ width: "100%", maxWidth: 560, position: "relative" }}>
+              <div style={{ background: "rgba(255,255,255,.06)", backdropFilter: "blur(24px)", borderRadius: 20, padding: "0 0 20px", boxShadow: "0 32px 100px rgba(0,87,255,.15), 0 4px 20px rgba(0,0,0,.2)", border: "1px solid rgba(0,87,255,.12)", overflow: "hidden" }}>
+                <div style={{ height: 3, background: "linear-gradient(90deg,#0057ff,#0ea5e9,#38bdf8)" }} />
+                <div style={{ padding: "20px 24px 0" }}>
+                  {/* LinkedIn post style */}
+                  <div style={{ display: "flex", gap: 12, alignItems: "center", marginBottom: 16 }}>
+                    <div style={{ width: 44, height: 44, borderRadius: "50%", background: "linear-gradient(135deg,#0057ff,#0ea5e9)", display: "flex", alignItems: "center", justifyContent: "center", fontWeight: 800, fontSize: 16, flexShrink: 0 }}>T</div>
+                    <div>
+                      <div style={{ fontWeight: 700, fontSize: 14 }}>Thomas Beaumont</div>
+                      <div style={{ fontSize: 12, color: "#475569" }}>CEO · Startup SaaS B2B · 12k abonnés</div>
+                    </div>
+                    <div style={{ marginLeft: "auto", background: "rgba(0,87,255,.1)", color: "#60a5fa", borderRadius: 8, padding: "4px 10px", fontSize: 11, fontWeight: 700, border: "1px solid rgba(0,87,255,.15)" }}>GhostIn ✓</div>
+                  </div>
+                  <div style={{ fontSize: 14, color: "#cbd5e1", lineHeight: 1.7, marginBottom: 16, textAlign: "left" }}>
+                    J&apos;ai généré <strong style={{ color: "#f0f4ff" }}>3 nouveaux clients</strong> en 30 jours sans prospecter.<br /><br />
+                    Pas de cold email. Pas de pub. Juste <strong style={{ color: "#60a5fa" }}>LinkedIn.</strong><br /><br />
+                    Voilà exactement ce que j&apos;ai fait ↓
+                  </div>
+                  <div style={{ display: "flex", justifyContent: "space-between", padding: "12px 0", borderTop: "1px solid rgba(255,255,255,.06)", fontSize: 13, color: "#475569" }}>
+                    <span>👍 2 143 réactions</span>
+                    <span>💬 394 commentaires</span>
+                    <span>🔁 521 partages</span>
+                  </div>
+                </div>
+              </div>
+              {/* Floating badges */}
+              <div className="hb2 fl" style={{ position: "absolute", top: -16, right: -14, background: "rgba(4,4,10,.95)", borderRadius: 12, padding: "9px 14px", boxShadow: "0 8px 32px rgba(0,87,255,.2)", border: "1px solid rgba(0,87,255,.15)", display: "flex", alignItems: "center", gap: 9 }}>
+                <span style={{ fontSize: 18 }}>✍️</span>
+                <div><div style={{ fontWeight: 700, fontSize: 12 }}>Post rédigé</div><div style={{ fontSize: 10, color: "#475569" }}>Dans votre style</div></div>
+              </div>
+              <div className="hb3 fl2" style={{ position: "absolute", bottom: -14, left: -14, background: "linear-gradient(135deg,#0057ff,#0ea5e9)", borderRadius: 12, padding: "9px 14px", boxShadow: "0 8px 32px rgba(0,87,255,.35)", display: "flex", alignItems: "center", gap: 9 }}>
+                <span style={{ fontSize: 18 }}>🚀</span>
+                <div><div style={{ fontWeight: 700, fontSize: 12, color: "#fff" }}>199€/mois</div><div style={{ fontSize: 10, color: "rgba(255,255,255,.65)" }}>8 posts garantis</div></div>
+              </div>
+            </TiltCard>
+          </div>
+        </section>
+
+        {/* MARQUEE 1 */}
+        <div style={{ overflow: "hidden", padding: "20px 0", borderTop: "1px solid rgba(0,87,255,.07)", borderBottom: "1px solid rgba(0,87,255,.07)", background: "rgba(0,0,0,.3)" }}>
+          <div className="mq">
+            {[...Array(2)].flatMap(() => ROLES.map((r, i) => (
+              <div key={`${r}${i}`} style={{ display: "flex", alignItems: "center", gap: 20, paddingRight: 40, whiteSpace: "nowrap" }}>
+                <span style={{ fontSize: 13, fontWeight: 500, color: "#334155" }}>{r}</span>
+                <span style={{ color: "#1e293b", fontSize: 8 }}>◆</span>
+              </div>
+            )))}
+          </div>
+        </div>
+
+        {/* HOW IT WORKS */}
+        <section id="s0" style={{ padding: "80px 24px 100px" }}>
+          <div style={{ maxWidth: 820, margin: "0 auto" }}>
+            <div className="sr" style={{ marginBottom: 56 }}>
+              <div style={{ display: "inline-flex", alignItems: "center", gap: 8, background: "rgba(0,87,255,.07)", border: "1px solid rgba(0,87,255,.15)", borderRadius: 999, padding: "6px 16px", fontSize: 13, color: "#60a5fa", fontWeight: 500, marginBottom: 16 }}>Comment ça marche</div>
+              <h2 style={{ fontSize: "clamp(28px,4.5vw,54px)", fontWeight: 900, letterSpacing: "-1.5px", lineHeight: 1.08 }}>
+                Vous parlez.<br /><span style={BG}>On écrit. Vous brillez.</span>
+              </h2>
+            </div>
             {[
-              { value: "8 posts", label: "livrés chaque mois" },
-              { value: "199€", label: "par mois, tout inclus" },
-              { value: "48h", label: "pour démarrer" },
+              { n: "01", e: "🎙️", t: "Onboarding 30 min", d: "On apprend votre style, vos opinions, vos sujets de prédilection. Une interview et on a tout ce qu'il nous faut." },
+              { n: "02", e: "✍️", t: "8 posts rédigés / mois", d: "En avance. Dans votre style. Chaque post est unique, engageant, et authentiquement vous." },
+              { n: "03", e: "✅", t: "Vous validez, vous publiez", d: "Vous relisez, vous publiez quand vous voulez. Aucune contrainte. Vous gardez le contrôle total." },
             ].map((s, i) => (
-              <div key={i} style={{ padding: "24px 0", borderRight: i < 2 ? "1px solid rgba(255,255,255,0.06)" : "none" }}>
-                <div style={{ fontSize: 40, fontWeight: 700, letterSpacing: "-1px" }}>{s.value}</div>
-                <div style={{ fontSize: 14, color: "#6e6e73", marginTop: 4 }}>{s.label}</div>
+              <div key={i} className="sr" style={{ display: "grid", gridTemplateColumns: "68px 1fr", gap: 24, padding: "32px 0", borderBottom: i < 2 ? "1px solid rgba(255,255,255,.04)" : "none", alignItems: "flex-start" }}>
+                <div style={{ width: 56, height: 56, borderRadius: 16, background: "rgba(0,87,255,.08)", border: "1px solid rgba(0,87,255,.1)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 24, flexShrink: 0 }}>{s.e}</div>
+                <div>
+                  <div style={{ fontSize: 10, color: "#60a5fa", fontWeight: 700, letterSpacing: 2, marginBottom: 7, textTransform: "uppercase" }}>Étape {s.n}</div>
+                  <h3 style={{ fontSize: 21, fontWeight: 700, marginBottom: 8, letterSpacing: "-.3px" }}>{s.t}</h3>
+                  <p style={{ fontSize: 15, color: "#475569", lineHeight: 1.65, maxWidth: 480 }}>{s.d}</p>
+                </div>
               </div>
             ))}
           </div>
         </section>
-      </AnimatedSection>
 
-      {/* HOW IT WORKS */}
-      <section id="comment" style={{ padding: "120px 24px" }}>
-        <div style={{ maxWidth: 900, margin: "0 auto" }}>
-          <AnimatedSection>
-            <p style={{ color: "#0a66c2", fontSize: 14, fontWeight: 600, textTransform: "uppercase", letterSpacing: 2, marginBottom: 16 }}>Comment ça marche</p>
-            <h2 style={{ fontSize: "clamp(36px, 5vw, 56px)", fontWeight: 700, letterSpacing: "-1.5px", marginBottom: 80, maxWidth: 600, lineHeight: 1.1 }}>
-              Simple comme bonjour.<br />Puissant comme une agence.
-            </h2>
-          </AnimatedSection>
-
-          <div style={{ display: "flex", flexDirection: "column", gap: 2 }}>
-            {STEPS.map((step, i) => (
-              <AnimatedSection key={i} delay={i * 0.1}>
-                <div style={{
-                  display: "grid", gridTemplateColumns: "80px 1fr",
-                  gap: 32, padding: "40px 0",
-                  borderBottom: i < STEPS.length - 1 ? "1px solid rgba(255,255,255,0.06)" : "none",
-                }}>
-                  <div style={{ fontSize: 48, fontWeight: 700, color: "rgba(255,255,255,0.08)", letterSpacing: "-2px", lineHeight: 1 }}>
-                    {step.number}
-                  </div>
-                  <div>
-                    <h3 style={{ fontSize: 24, fontWeight: 600, marginBottom: 12 }}>{step.title}</h3>
-                    <p style={{ fontSize: 16, color: "#86868b", lineHeight: 1.7, maxWidth: 500 }}>{step.desc}</p>
-                  </div>
-                </div>
-              </AnimatedSection>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* EXAMPLES */}
-      <section id="exemples" style={{ padding: "120px 24px", background: "#0a0a0a" }}>
-        <div style={{ maxWidth: 900, margin: "0 auto" }}>
-          <AnimatedSection>
-            <p style={{ color: "#0a66c2", fontSize: 14, fontWeight: 600, textTransform: "uppercase", letterSpacing: 2, marginBottom: 16 }}>Exemples de posts</p>
-            <h2 style={{ fontSize: "clamp(36px, 5vw, 56px)", fontWeight: 700, letterSpacing: "-1.5px", marginBottom: 16, lineHeight: 1.1 }}>
-              Écrits pour convertir.<br />Calibrés sur vous.
-            </h2>
-            <p style={{ color: "#86868b", fontSize: 18, marginBottom: 64 }}>Chaque post est unique, dans votre voix, sur vos sujets.</p>
-          </AnimatedSection>
-
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))", gap: 16 }}>
-            {POSTS.map((post, i) => (
-              <AnimatedSection key={i} delay={i * 0.1}>
-                <div style={{
-                  background: "#111", border: "1px solid rgba(255,255,255,0.08)",
-                  borderRadius: 16, padding: 24,
-                  transition: "border-color 0.3s, transform 0.3s",
-                }}
-                  onMouseEnter={e => {
-                    (e.currentTarget as HTMLElement).style.borderColor = "rgba(10,102,194,0.4)";
-                    (e.currentTarget as HTMLElement).style.transform = "translateY(-4px)";
-                  }}
-                  onMouseLeave={e => {
-                    (e.currentTarget as HTMLElement).style.borderColor = "rgba(255,255,255,0.08)";
-                    (e.currentTarget as HTMLElement).style.transform = "translateY(0)";
-                  }}
-                >
-                  <div style={{ display: "flex", gap: 12, marginBottom: 16 }}>
-                    <div style={{
-                      width: 40, height: 40, borderRadius: "50%", background: post.color,
-                      display: "flex", alignItems: "center", justifyContent: "center",
-                      fontSize: 13, fontWeight: 700, color: "white", flexShrink: 0,
-                    }}>{post.avatar}</div>
-                    <div>
-                      <div style={{ fontWeight: 600, fontSize: 14 }}>{post.name}</div>
-                      <div style={{ fontSize: 12, color: "#6e6e73" }}>{post.role}</div>
+        {/* EXAMPLE POSTS */}
+        <section id="s1" style={{ padding: "60px 24px 100px", background: "rgba(0,0,0,.3)", borderTop: "1px solid rgba(0,87,255,.06)" }}>
+          <div style={{ maxWidth: 900, margin: "0 auto" }}>
+            <div className="sr" style={{ marginBottom: 56 }}>
+              <div style={{ display: "inline-flex", alignItems: "center", gap: 8, background: "rgba(0,87,255,.07)", border: "1px solid rgba(0,87,255,.15)", borderRadius: 999, padding: "6px 16px", fontSize: 13, color: "#60a5fa", fontWeight: 500, marginBottom: 16 }}>Exemples de posts</div>
+              <h2 style={{ fontSize: "clamp(28px,4.5vw,54px)", fontWeight: 900, letterSpacing: "-1.5px", lineHeight: 1.08 }}>
+                Des vrais résultats.<br /><span style={BG}>Des vraies personnes.</span>
+              </h2>
+            </div>
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(250px,1fr))", gap: 16 }}>
+              {POSTS.map((p, i) => (
+                <TiltCard key={i} className="src post-card" style={{ cursor: "none" }}>
+                  <div style={{ background: "rgba(255,255,255,.04)", border: "1px solid rgba(0,87,255,.1)", borderRadius: 18, padding: "0 0 18px", overflow: "hidden", transition: "border-color .25s" }}
+                    onMouseEnter={e => ((e.currentTarget as HTMLElement).style.borderColor = "rgba(0,87,255,.3)")}
+                    onMouseLeave={e => ((e.currentTarget as HTMLElement).style.borderColor = "rgba(0,87,255,.1)")}>
+                    <div style={{ height: 3, background: "linear-gradient(90deg,#0057ff,#0ea5e9)" }} />
+                    <div style={{ padding: "18px 20px 0" }}>
+                      <div style={{ display: "flex", gap: 10, alignItems: "center", marginBottom: 14 }}>
+                        <div style={{ width: 38, height: 38, borderRadius: "50%", background: `linear-gradient(135deg,hsl(${i * 80},70%,40%),hsl(${i * 80 + 40},70%,55%))`, display: "flex", alignItems: "center", justifyContent: "center", fontWeight: 800, fontSize: 14, flexShrink: 0 }}>
+                          {p.name[0]}
+                        </div>
+                        <div>
+                          <div style={{ fontWeight: 700, fontSize: 13 }}>{p.name}</div>
+                          <div style={{ fontSize: 11, color: "#475569" }}>{p.title}</div>
+                        </div>
+                      </div>
+                      <div style={{ background: "rgba(0,87,255,.06)", color: "#60a5fa", fontSize: 10, fontWeight: 700, borderRadius: 6, padding: "3px 8px", display: "inline-block", marginBottom: 10 }}>{p.tag}</div>
+                      <p style={{ fontSize: 13, color: "#94a3b8", lineHeight: 1.65, marginBottom: 14 }}>{p.text}</p>
+                      <div style={{ display: "flex", gap: 12, fontSize: 12, color: "#334155", paddingTop: 12, borderTop: "1px solid rgba(255,255,255,.05)" }}>
+                        <span>👍 {p.likes}</span><span>💬 {p.comments}</span>
+                      </div>
                     </div>
                   </div>
-                  <p style={{ fontSize: 14, lineHeight: 1.7, color: "#d1d1d6", whiteSpace: "pre-line" }}>{post.content}</p>
-                  <div style={{ display: "flex", gap: 20, marginTop: 16, paddingTop: 16, borderTop: "1px solid rgba(255,255,255,0.06)", fontSize: 13, color: "#6e6e73" }}>
-                    <span>👍 {post.likes.toLocaleString()}</span>
-                    <span>💬 {post.comments}</span>
-                  </div>
-                </div>
-              </AnimatedSection>
-            ))}
+                </TiltCard>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        {/* MARQUEE 2 — Inversé */}
+        <div style={{ overflow: "hidden", padding: "18px 0", background: "rgba(0,0,0,.4)", borderTop: "1px solid rgba(0,87,255,.06)" }}>
+          <div className="mq2">
+            {[...Array(2)].flatMap(() => ["Notoriété", "Crédibilité", "Leads entrants", "Influence", "Visibilité", "Engagement", "Autorité", "Réseau"].map((r, i) => (
+              <div key={`${r}${i}`} style={{ display: "flex", alignItems: "center", gap: 20, paddingRight: 40, whiteSpace: "nowrap" }}>
+                <span style={{ fontSize: 13, fontWeight: 500, color: "#1e3a5f" }}>{r}</span>
+                <span style={{ color: "#1e293b", fontSize: 8 }}>◆</span>
+              </div>
+            )))}
           </div>
         </div>
-      </section>
 
-      {/* FEATURES */}
-      <section style={{ padding: "120px 24px" }}>
-        <div style={{ maxWidth: 900, margin: "0 auto" }}>
-          <AnimatedSection>
-            <p style={{ color: "#0a66c2", fontSize: 14, fontWeight: 600, textTransform: "uppercase", letterSpacing: 2, marginBottom: 16 }}>Ce qui est inclus</p>
-            <h2 style={{ fontSize: "clamp(36px, 5vw, 56px)", fontWeight: 700, letterSpacing: "-1.5px", marginBottom: 64, lineHeight: 1.1 }}>
-              Tout ce dont vous<br />avez besoin.
-            </h2>
-          </AnimatedSection>
+        {/* PRICING */}
+        <section id="s2" style={{ padding: "96px 24px" }}>
+          <div style={{ maxWidth: 860, margin: "0 auto" }}>
+            <div className="sr" style={{ marginBottom: 56, textAlign: "center" }}>
+              <div style={{ display: "inline-flex", alignItems: "center", gap: 8, background: "rgba(0,87,255,.07)", border: "1px solid rgba(0,87,255,.15)", borderRadius: 999, padding: "6px 16px", fontSize: 13, color: "#60a5fa", fontWeight: 500, marginBottom: 16 }}>Tarif</div>
+              <h2 style={{ fontSize: "clamp(28px,4.5vw,54px)", fontWeight: 900, letterSpacing: "-1.5px", lineHeight: 1.08 }}>
+                Simple.<br /><span style={BG}>Transparent. Récurrent.</span>
+              </h2>
+            </div>
 
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(260px, 1fr))", gap: 1, background: "rgba(255,255,255,0.06)" }}>
-            {FEATURES.map((f, i) => (
-              <AnimatedSection key={i} delay={i * 0.05}>
-                <div style={{ background: "#000", padding: "40px 32px" }}>
-                  <div style={{ fontSize: 24, marginBottom: 16, color: "#0a66c2" }}>{f.icon}</div>
-                  <h3 style={{ fontSize: 18, fontWeight: 600, marginBottom: 8 }}>{f.title}</h3>
-                  <p style={{ fontSize: 15, color: "#86868b", lineHeight: 1.6 }}>{f.desc}</p>
+            <div className="pricing-grid sr" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16 }}>
+              {/* Card 1 */}
+              <div style={{ background: "rgba(255,255,255,.03)", border: "1px solid rgba(0,87,255,.1)", borderRadius: 22, padding: "40px 36px" }}>
+                <div style={{ fontSize: 13, color: "#475569", marginBottom: 8 }}>Mensuel</div>
+                <div style={{ fontSize: 60, fontWeight: 900, letterSpacing: "-3px", ...BG, lineHeight: 1 }}>199€</div>
+                <div style={{ fontSize: 13, color: "#334155", marginBottom: 32 }}>par mois · sans engagement</div>
+                <div style={{ display: "flex", flexDirection: "column", gap: 13, marginBottom: 36 }}>
+                  {["8 posts LinkedIn/mois", "Rédigés dans votre style exact", "Onboarding 30 min", "Révisions illimitées", "Livraison 5 jours avant publication", "Résiliable à tout moment"].map((f, i) => (
+                    <div key={i} style={{ display: "flex", gap: 11, alignItems: "center", fontSize: 14 }}>
+                      <div style={{ width: 21, height: 21, borderRadius: "50%", background: "linear-gradient(135deg,#0057ff,#0ea5e9)", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+                        <span style={{ color: "#fff", fontSize: 10, fontWeight: 800 }}>✓</span>
+                      </div>
+                      <span style={{ color: "#94a3b8" }}>{f}</span>
+                    </div>
+                  ))}
                 </div>
-              </AnimatedSection>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* PRICING */}
-      <section id="tarif" style={{ padding: "120px 24px", background: "#0a0a0a" }}>
-        <div style={{ maxWidth: 520, margin: "0 auto", textAlign: "center" }}>
-          <AnimatedSection>
-            <p style={{ color: "#0a66c2", fontSize: 14, fontWeight: 600, textTransform: "uppercase", letterSpacing: 2, marginBottom: 16 }}>Tarif</p>
-            <h2 style={{ fontSize: "clamp(36px, 5vw, 56px)", fontWeight: 700, letterSpacing: "-1.5px", marginBottom: 16, lineHeight: 1.1 }}>Un seul plan.<br />Simple.</h2>
-            <p style={{ color: "#86868b", fontSize: 18, marginBottom: 64 }}>Pas de paliers, pas de surprises.</p>
-
-            <div style={{
-              background: "#111", border: "1px solid rgba(255,255,255,0.1)",
-              borderRadius: 24, padding: "48px 40px",
-              boxShadow: "0 0 80px rgba(10,102,194,0.08)",
-            }}>
-              <div style={{ fontSize: 64, fontWeight: 700, letterSpacing: "-2px" }}>199€</div>
-              <div style={{ color: "#86868b", fontSize: 16, marginBottom: 40 }}>par mois · sans engagement</div>
-
-              <div style={{ display: "flex", flexDirection: "column", gap: 16, marginBottom: 40, textAlign: "left" }}>
-                {[
-                  "8 posts LinkedIn par mois",
-                  "Rédigés dans votre style exact",
-                  "Hooks optimisés pour l'algorithme",
-                  "Livrés le 1er du mois",
-                  "Révisions illimitées",
-                  "Résiliable à tout moment",
-                ].map((item, i) => (
-                  <div key={i} style={{ display: "flex", gap: 12, alignItems: "center", fontSize: 16 }}>
-                    <span style={{ color: "#0a66c2", fontWeight: 700 }}>✓</span>
-                    <span>{item}</span>
-                  </div>
-                ))}
+                <MagBtn href="#contact" primary>Démarrer ce mois →</MagBtn>
               </div>
 
-              <a
-                href="#contact"
-                style={{
-                  display: "block", background: "#0a66c2", color: "white",
-                  padding: "16px", borderRadius: 12, fontSize: 16, fontWeight: 600,
-                  textDecoration: "none", textAlign: "center",
-                  transition: "opacity 0.2s",
-                }}
-                onMouseEnter={e => (e.currentTarget.style.opacity = "0.85")}
-                onMouseLeave={e => (e.currentTarget.style.opacity = "1")}
-              >
-                Démarrer maintenant
-              </a>
+              {/* Card 2 — highlighted */}
+              <div style={{ padding: 2, borderRadius: 24, background: "linear-gradient(135deg,#0057ff,#0ea5e9,#38bdf8,#0057ff)", backgroundSize: "300%", animation: "gb 4s ease infinite" }}>
+                <div style={{ background: "#04040a", borderRadius: 22, padding: "40px 36px", height: "100%" }}>
+                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 8 }}>
+                    <span style={{ fontSize: 13, color: "#475569" }}>Trimestriel</span>
+                    <span style={{ background: "rgba(0,87,255,.1)", color: "#60a5fa", fontSize: 11, fontWeight: 700, borderRadius: 99, padding: "3px 10px", border: "1px solid rgba(0,87,255,.2)" }}>- 10%</span>
+                  </div>
+                  <div style={{ fontSize: 60, fontWeight: 900, letterSpacing: "-3px", ...BG, lineHeight: 1 }}>179€</div>
+                  <div style={{ fontSize: 13, color: "#334155", marginBottom: 32 }}>par mois · engagement 3 mois</div>
+                  <div style={{ display: "flex", flexDirection: "column", gap: 13, marginBottom: 36 }}>
+                    {["Tout le pack mensuel", "10 posts/mois au lieu de 8", "Analyse performance mensuelle", "Stratégie éditoriale incluse", "Priorité sur les délais", "Support WhatsApp direct"].map((f, i) => (
+                      <div key={i} style={{ display: "flex", gap: 11, alignItems: "center", fontSize: 14 }}>
+                        <div style={{ width: 21, height: 21, borderRadius: "50%", background: "linear-gradient(135deg,#0057ff,#0ea5e9)", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+                          <span style={{ color: "#fff", fontSize: 10, fontWeight: 800 }}>✓</span>
+                        </div>
+                        <span style={{ color: "#94a3b8" }}>{f}</span>
+                      </div>
+                    ))}
+                  </div>
+                  <MagBtn href="#contact" primary>Meilleur rapport qualité/prix →</MagBtn>
+                </div>
+              </div>
             </div>
-          </AnimatedSection>
-        </div>
-      </section>
+          </div>
+        </section>
 
-      {/* CTA / CONTACT */}
-      <section id="contact" style={{ padding: "120px 24px", textAlign: "center" }}>
-        <div style={{ maxWidth: 600, margin: "0 auto" }}>
-          <AnimatedSection>
-            <h2 style={{ fontSize: "clamp(36px, 5vw, 64px)", fontWeight: 700, letterSpacing: "-2px", marginBottom: 24, lineHeight: 1.05 }}>
-              Prêt à exister sur<br />LinkedIn ?
-            </h2>
-            <p style={{ color: "#86868b", fontSize: 18, marginBottom: 48 }}>
-              Laissez votre email. On vous répond sous 24h avec un questionnaire de 5 questions.
-            </p>
+        {/* CTA */}
+        <section id="contact" style={{ padding: "72px 24px 112px", background: "rgba(0,0,0,.3)", borderTop: "1px solid rgba(0,87,255,.06)" }}>
+          <div style={{ maxWidth: 580, margin: "0 auto", textAlign: "center" }}>
+            <div className="sr">
+              <h2 style={{ fontSize: "clamp(28px,4.5vw,56px)", fontWeight: 900, letterSpacing: "-1.5px", lineHeight: 1.08, marginBottom: 14 }}>
+                Votre prochain post<br /><span style={BG}>est déjà écrit.</span>
+              </h2>
+              <p style={{ color: "#475569", fontSize: 17, marginBottom: 44, lineHeight: 1.65 }}>
+                Laissez votre email. On vous répond dans l&apos;heure.
+              </p>
+              {sent ? (
+                <div style={{ background: "rgba(0,87,255,.07)", border: "1px solid rgba(0,87,255,.18)", borderRadius: 16, padding: "28px", fontSize: 18, color: "#60a5fa", fontWeight: 600 }}>
+                  ✓ Reçu ! On vous contact dans l&apos;heure. 🚀
+                </div>
+              ) : (
+                <form onSubmit={e => { e.preventDefault(); if (email) setSent(true); }}
+                  style={{ display: "flex", gap: 9, maxWidth: 460, margin: "0 auto", flexWrap: "wrap", justifyContent: "center" }}>
+                  <input type="email" placeholder="votre@email.com" value={email} onChange={e => setEmail(e.target.value)} required
+                    style={{ flex: 1, minWidth: 200, background: "rgba(255,255,255,.05)", border: "1.5px solid rgba(0,87,255,.15)", borderRadius: 12, padding: "14px 18px", color: "#f0f4ff", fontSize: 15, outline: "none", fontFamily: "inherit" }}
+                    onFocus={e => { (e.target as HTMLInputElement).style.borderColor = "rgba(0,87,255,.5)"; (e.target as HTMLInputElement).style.boxShadow = "0 0 0 4px rgba(0,87,255,.08)"; }}
+                    onBlur={e => { (e.target as HTMLInputElement).style.borderColor = "rgba(0,87,255,.15)"; (e.target as HTMLInputElement).style.boxShadow = "none"; }} />
+                  <button type="submit" style={{ background: "linear-gradient(135deg,#0057ff,#0ea5e9)", color: "#fff", padding: "14px 28px", borderRadius: 12, fontSize: 15, fontWeight: 700, border: "none", cursor: "none", fontFamily: "inherit", boxShadow: "0 8px 24px rgba(0,87,255,.35)" }}>
+                    Démarrer →
+                  </button>
+                </form>
+              )}
+              <p style={{ marginTop: 16, fontSize: 13, color: "#334155" }}>
+                Ou écrivez à{" "}
+                <a href="mailto:contact@mindforge-ia.com" style={{ color: "#60a5fa", textDecoration: "none", fontWeight: 500 }}>contact@mindforge-ia.com</a>
+              </p>
+            </div>
+          </div>
+        </section>
 
-            {submitted ? (
-              <motion.div
-                initial={{ opacity: 0, scale: 0.9 }}
-                animate={{ opacity: 1, scale: 1 }}
-                style={{
-                  background: "rgba(10,102,194,0.1)", border: "1px solid rgba(10,102,194,0.3)",
-                  borderRadius: 16, padding: "32px", fontSize: 18,
-                }}
-              >
-                ✓ Reçu ! On vous contacte sous 24h. 🎉
-              </motion.div>
-            ) : (
-              <form
-                onSubmit={(e) => {
-                  e.preventDefault();
-                  if (email) setSubmitted(true);
-                }}
-                style={{ display: "flex", gap: 12, maxWidth: 440, margin: "0 auto", flexWrap: "wrap", justifyContent: "center" }}
-              >
-                <input
-                  type="email"
-                  placeholder="votre@email.com"
-                  value={email}
-                  onChange={e => setEmail(e.target.value)}
-                  required
-                  style={{
-                    flex: 1, minWidth: 240,
-                    background: "#1c1c1e", border: "1px solid rgba(255,255,255,0.12)",
-                    borderRadius: 12, padding: "16px 20px",
-                    color: "#fff", fontSize: 16, outline: "none",
-                  }}
-                />
-                <button
-                  type="submit"
-                  style={{
-                    background: "#fff", color: "#000",
-                    padding: "16px 28px", borderRadius: 12,
-                    fontSize: 16, fontWeight: 600, border: "none", cursor: "pointer",
-                    transition: "opacity 0.2s",
-                  }}
-                  onMouseEnter={e => (e.currentTarget.style.opacity = "0.85")}
-                  onMouseLeave={e => (e.currentTarget.style.opacity = "1")}
-                >
-                  Démarrer
-                </button>
-              </form>
-            )}
-
-            <p style={{ marginTop: 20, fontSize: 13, color: "#6e6e73" }}>
-              Ou écrivez directement à{" "}
-              <a href="mailto:contact@mindforge-ia.com" style={{ color: "#0a66c2", textDecoration: "none" }}>
-                contact@mindforge-ia.com
-              </a>
-            </p>
-          </AnimatedSection>
-        </div>
-      </section>
-
-      {/* FOOTER */}
-      <footer style={{ padding: "40px 48px", borderTop: "1px solid rgba(255,255,255,0.06)", display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: 16 }}>
-        <span style={{ fontWeight: 700, fontSize: 18 }}>Ghost<span style={{ color: "#0a66c2" }}>In</span></span>
-        <span style={{ fontSize: 13, color: "#6e6e73" }}>© 2026 GhostIn · Par <a href="https://zmimer.dev" style={{ color: "#0a66c2", textDecoration: "none" }}>Safwane</a></span>
-        <a href="mailto:contact@mindforge-ia.com" style={{ fontSize: 13, color: "#6e6e73", textDecoration: "none" }}>contact@mindforge-ia.com</a>
-      </footer>
-
-    </main>
+        {/* FOOTER */}
+        <footer style={{ padding: "24px clamp(20px,4vw,48px)", borderTop: "1px solid rgba(0,87,255,.07)", display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: 10, background: "rgba(0,0,0,.5)" }}>
+          <span style={{ fontWeight: 900, fontSize: 17 }}>Ghost<span style={BG}>In</span></span>
+          <span style={{ fontSize: 13, color: "#334155" }}>© 2026 · Par Safwane</span>
+          <a href="mailto:contact@mindforge-ia.com" style={{ fontSize: 13, color: "#334155", textDecoration: "none" }}>contact@mindforge-ia.com</a>
+        </footer>
+      </div>
+    </>
   );
 }
